@@ -1,0 +1,2 @@
+rootProject.name = "Dynamic Content Example"
+include ':app'
