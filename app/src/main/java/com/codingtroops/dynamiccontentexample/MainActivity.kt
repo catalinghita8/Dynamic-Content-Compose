@@ -9,10 +9,8 @@ import androidx.compose.material.Button
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.setContent
@@ -22,18 +20,17 @@ import androidx.compose.ui.tooling.preview.Preview
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val viewModel = MainViewModel()
         setContent {
-            MainScreen()
+            MainScreen(viewModel)
         }
     }
 }
 
 @Composable
-fun MainScreen() {
-    val greetingListState = remember {
-        mutableStateListOf<String>("John", "Amanda")
-    }
-    val newNameStateContent = remember { mutableStateOf("") }
+fun MainScreen(viewModel: MainViewModel) {
+    val greetingListState = viewModel.namesListData
+    val newNameTextState: State<String> = viewModel.newNameData.observeAsState("")
 
     Column(
             modifier = Modifier.fillMaxSize(),
@@ -41,9 +38,9 @@ fun MainScreen() {
             horizontalAlignment = Alignment.CenterHorizontally
     ) {
         GreetingList(greetingListState,
-                { greetingListState.add(newNameStateContent.value) },
-                newNameStateContent.value,
-                { newName -> newNameStateContent.value = newName })
+            { viewModel.onNewNameAdded() },
+            newNameTextState.value,
+            { newName -> viewModel.onTextFieldNameUpdated(newName) })
     }
 }
 
@@ -75,5 +72,6 @@ fun Greeting(name: String) {
 @Preview(showBackground = true)
 @Composable
 fun DefaultPreview() {
-    MainScreen()
+    val viewModel = MainViewModel()
+    MainScreen(viewModel)
 }
